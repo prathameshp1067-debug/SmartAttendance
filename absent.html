@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Absent Students</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container">
+    <h1>Absent Students</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Roll No</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for roll in absent_rolls %}
+            <tr>
+                <td>{{ roll }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Back to admin page -->
+    <a href="{{ url_for('admin_page') }}">
+        <button>Back to Attendance</button>
+    </a>
+</div>
+</body>
+</html>
