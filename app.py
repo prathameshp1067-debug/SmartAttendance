@@ -157,6 +157,7 @@ if not os.path.exists(excel_file):
     # Absent Sheet
     ws_absent = wb.create_sheet("Absent")
     ws_absent.append(["Roll No"])
+    ws_absent.append(["name"])
 
     wb.save(excel_file)
 
@@ -218,6 +219,7 @@ def save_absentees():
 
         ws_absent = wb.create_sheet("Absent")
         ws_absent.append(["Roll No"])
+        ws_absent.append(["Name"])
 
     else:
 
@@ -237,11 +239,17 @@ def save_absentees():
         roll for roll in all_students
         if roll not in present_rolls
     ]
+    present_names = [row[0] for row in cursor.fetchall()]
 
+    absent_names = [
+        name for name in all_students
+        if name not in present_names
+    ]
     # Save absent list
     for roll in absent_rolls:
         ws_absent.append([roll])
-
+    for name in present_names:
+        ws_absent.append([name])
     wb.save(excel_file)
 
     print("Absent roll numbers saved")
@@ -381,24 +389,41 @@ def admin_page():
         records=records
     )
 
-
 @app.route('/absent')
 def absent_page():
 
+    # Get present roll numbers
     cursor.execute("SELECT rollno FROM attendance")
 
     present_rolls = [row[0] for row in cursor.fetchall()]
 
-    absent_rolls = [
-        roll for roll in all_students
-        if roll not in present_rolls
-    ]
+    absent_students = []
+
+    # Read DataSet folder
+    for student_name in os.listdir(DATASET_PATH):
+
+        student_folder = os.path.join(DATASET_PATH, student_name)
+
+        if os.path.isdir(student_folder):
+
+            for rollno in os.listdir(student_folder):
+
+                roll_folder = os.path.join(student_folder, rollno)
+
+                if os.path.isdir(roll_folder):
+
+                    # If student absent
+                    if rollno not in present_rolls:
+
+                        absent_students.append({
+                            "name": student_name,
+                            "rollno": rollno
+                        })
 
     return render_template(
         'absent.html',
-        absent_rolls=absent_rolls
+        absent_students=absent_students
     )
-
 # ============================
 # Run Flask App
 # ============================
